@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <title>Document</title>
+  </head>
+  <body class="bg-light">
+    <div class="container mb-5">
+      <div class="row mb-5">
+        <div class="mx-auto my-auto bg-white col-7 shadow border">
+          <h1 class="text-center">TO-DO LIST</h1>
+          <input type="text" placeholder="Task Name" class="form-control mb-1" name="" id="todoName">
+          <br>
+          <label for="todoTime">Input Task Time: </label>
+          <input type="time" placeholder="Fix Time" class="form-control mb-1" name="" id="todoTime">
+          <button onclick="submitTask()" id="toDoBtn" class="form-control btn mb-3 btn-dark">Submit</button>
+        </div>
+      </div>
+
+     
+      <!-- Modal -->
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Edit Task </h5>
+              
+            </div>
+            <div class="modal-body">
+              <h1 class="text-center">TO-DO LIST</h1>
+              <input type="text" placeholder="Task Name" class="form-control mb-1" name="" id="editName">
+              <br>
+              <label for="editTime">Input Task Time: </label>
+              <input type="time" placeholder="Fix Time" class="form-control mb-1" name="" id="editTime">
+              
+            </div>
+            <div class="modal-footer">
+              <button id="saveChanges" class="btn btn-dark" data-bs-dismiss="modal">Save changes</button>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div id="contentTable">
+
+        <table align="center" class="w-75 shadow-sm bg-white table table-hover table-striped text-center p-3">
+          <thead>
+            <tr>
+              <th >Task Description</th>
+              <th >Task Time</th>
+              <th >Updated</th>
+              <th class="text-success">Edit</th>
+              <th class="text-danger">Delete</th>
+            </tr>
+          </thead>
+          <tbody id="displayTodo">
+            <tr>
+              <td class="">Task Infrastructure</td>
+              <td>Due Time</td>
+              <td>Updated</td>
+              <td>Edit Task</td>
+              <td>Delete Task</td>
+            </tr>
+            <tr>
+              <td class="">Task Infrastructure</td>
+              <td>Due Time</td>
+              <td>Updated</td>
+              <td>Edit Task</td>
+              <td>Delete Task</td>
+            </tr>
+            <tr>
+              <td class="">Task Infrastructure</td>
+              <td>Due Time</td>
+              <td>Updated</td>
+              <td>Edit Task</td>
+              <td>Delete Task</td>
+            </tr>
+            <tr>
+              <td class="">Task Infrastructure</td>
+              <td>Due Time</td>
+              <td>Updated</td>
+              <td>Edit Task</td>
+              <td>Delete Task</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+
+
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-app.js";
+      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.8.2/firebase-database.js";
+      // TODO: Add SDKs for Firebase products that you want to use
+      // https://firebase.google.com/docs/web/setup#available-libraries
+    
+      // Your web app's Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyAx7eBbPRW1qEgDmAoe_-0n_9J1k4hYa8A",
+        authDomain: "database-class-rex.firebaseapp.com",
+        databaseURL: "https://database-class-rex-default-rtdb.firebaseio.com",
+        projectId: "database-class-rex",
+        storageBucket: "database-class-rex.appspot.com",
+        messagingSenderId: "908328961167",
+        appId: "1:908328961167:web:4aa5f327f52736d3611cfa"
+      };
+    
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const database = getDatabase();
+
+      let dbRef = ref(database, "myTodo");
+      let nextIndex;
+      let myTodoArray;
+
+      
+      onValue(dbRef, function(snapshot){
+        myTodoArray = snapshot.val();
+        // console.log(myTodoArray, 'myTodo', myTodoArray.length)
+        if (myTodoArray) {
+          nextIndex = myTodoArray.length;
+          displaymyTodo(myTodoArray)
+        } else {
+          // vague.innerHTML = 'You have no Tasks';
+          nextIndex = 0
+        }
+      })
+
+      window.submitTask =()=> {
+        let todo = todoName.value;
+        let addTime = new Date().toLocaleTimeString();
+        let taskTime = todoTime.value
+
+        let taskObj = {"item": todo, "todoTime": taskTime, "time": addTime}
+        
+        // console.log(todo);
+        let todoRef = ref(database, `myTodo/${nextIndex}`);
+        console.log(taskObj)
+        set(todoRef, taskObj );
+      }
+
+
+      let myCurrentIndex;
+
+      function displaymyTodo (myTodoArray) {
+        // console.log(myTodoArray.length);
+        if(!myTodoArray.length){
+          
+          document.getElementById('contentTable').innerHTML = 'You have no tasks';
+        }else{
+          let myTodoHtml = "";
+          myTodoArray.map((todo, i) =>{
+            
+            myTodoHtml += `<tr> 
+              <td class="w-50 text-left"> ${todo.item} </td>
+              <td>${todo.todoTime} </td> 
+              <td>${todo.time} </td>
+              <td onclick = 'edit(${i})'><img src="edit.png" data-bs-toggle="modal" data-bs-target="#exampleModal" width="20"></td>
+              
+              
+              <td onclick = 'dele(${i})'><img src="bin.png" width="20"> </td> 
+              </tr>`
+            })
+            displayTodo.innerHTML = myTodoHtml
+          } 
+      }
+
+      window.dele=(n)=>{
+
+        let myNewArray = myTodoArray.filter((todo,index)=> n != index )
+        let todoRef = ref(database, `myTodo`);
+        set(todoRef, myNewArray)
+      }
+      window.edit=(n)=>{
+        myCurrentIndex = n;
+        editName.value = myTodoArray[n].item;
+        editTime.value = myTodoArray[n].todoTime;
+      }
+
+      document.getElementById('saveChanges').addEventListener('click', ()=>{
+        let todo = editName.value;
+        let addTime = new Date().toLocaleTimeString();
+        let taskTime = editTime.value
+        let taskObj = {"item": todo, "todoTime": taskTime, "time": addTime}
+        let todoRef = ref(database, `myTodo/${myCurrentIndex}`);
+        set(todoRef, taskObj )
+      })
+
+
+
+     
+
+      
+      
+    </script>
+  </body>
+</html>
